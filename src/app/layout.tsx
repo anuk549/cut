@@ -11,6 +11,7 @@ import AccountMenu from "@/components/account-menu";
 import { getCurrentUser } from "@/lib/user-auth";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { connection } from "next/server";
+import { Analytics } from "@vercel/analytics/next";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -216,6 +217,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </div>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
