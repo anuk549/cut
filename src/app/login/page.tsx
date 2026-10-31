@@ -68,7 +68,7 @@ export default function LoginPage() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               className="field"
-              placeholder="adminhed@mati.com or username"
+              placeholder="username"
               type="text"
               autoComplete="username"
               required
@@ -122,6 +122,13 @@ export default function LoginPage() {
               "Sign in"
             )}
           </button>
+
+          <p className="mt-4 text-center text-[0.85rem] text-muted">
+            Forgot your password?{" "}
+            <Link href="/forgot-password" className="border-b border-ink/30 pb-0.5 text-ink hover:text-clay-dark">
+              Reset it
+            </Link>
+          </p>
 
           <p className="mt-6 text-center text-[0.9rem] text-muted">
             New to MATI?{" "}
