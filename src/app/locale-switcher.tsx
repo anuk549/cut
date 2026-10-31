@@ -18,7 +18,7 @@ export default function LocaleSwitcher({ current }: { current: string }) {
       aria-label="Language"
       value={locale}
       onChange={(e) => change(e.target.value)}
-      className="h-9 border border-line bg-transparent px-2 text-[0.75rem] font-medium uppercase tracking-[0.11em] text-ink/80 outline-none transition-colors hover:border-clay focus:border-clay"
+      className="h-10 border border-line bg-transparent px-2.5 text-[0.75rem] font-medium uppercase tracking-[0.11em] text-ink/80 outline-none transition-colors hover:border-clay focus:border-clay"
     >
       <option value="en">EN</option>
       <option value="si">සිං</option>

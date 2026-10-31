@@ -1,5 +1,5 @@
 export const instant = false;
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
@@ -30,6 +30,12 @@ export const metadata: Metadata = {
   title: "MATI — One-of-one Hand-Cast Vessels from Sri Lanka",
   description:
     "Hand-cast white cement vessels for small jewellery and keepsakes, made one at a time in silicone moulds, slowly dried and hand-glazed in Sri Lanka.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#f4efe6",
 };
 
 function BrandMark() {
@@ -81,18 +87,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col bg-ivory text-ink">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-4 focus:py-3 focus:text-[0.75rem] focus:font-semibold focus:uppercase focus:tracking-[0.12em] focus:text-ivory"
+        >
+          Skip to content
+        </a>
         <header className="sticky top-0 z-50 border-b border-line/80 bg-ivory/95 backdrop-blur-md">
-          <div className="bg-ink px-4 py-2 text-ivory">
-            <div className="shell flex items-center justify-between gap-4 text-[0.75rem] font-medium uppercase tracking-[0.16em]">
-              <span>{t(locale, "craftedIn")}</span>
-              <span className="hidden text-ivory/75 sm:inline">{t(locale, "handThrown")}</span>
+          <div className="bg-ink px-4 py-1.5 text-ivory sm:py-2">
+            <div className="shell flex items-center justify-between gap-4 text-[0.7rem] font-medium uppercase tracking-[0.13em] sm:text-[0.75rem] sm:tracking-[0.16em]">
+              <span className="truncate">{t(locale, "craftedIn")}</span>
+              <span className="hidden shrink-0 text-ivory/75 sm:inline">{t(locale, "handThrown")}</span>
             </div>
           </div>
-          <div className="shell flex h-16 items-center justify-between gap-4 sm:h-20 sm:gap-6">
-            <Link href="/" className="flex items-center gap-2 sm:gap-3">
+          <div className="shell flex h-16 items-center justify-between gap-3 sm:h-20 sm:gap-6">
+            <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
               <BrandMark />
-              <span className="flex flex-col leading-none">
-                <span className="font-display text-[1.4rem] tracking-[0.18em] text-ink sm:text-[1.7rem] sm:tracking-[0.2em]">
+              <span className="flex min-w-0 flex-col leading-none">
+                <span className="truncate font-display text-[1.4rem] tracking-[0.18em] text-ink sm:text-[1.7rem] sm:tracking-[0.2em]">
                   {t(locale, "brand")}
                 </span>
                 <span className="mt-1 hidden text-[0.75rem] font-medium uppercase tracking-[0.16em] text-muted sm:inline">
@@ -101,7 +113,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </span>
             </Link>
 
-            <nav className="hidden items-center gap-8 text-[0.75rem] font-medium uppercase tracking-[0.14em] text-ink/75 md:flex">
+            <nav
+              aria-label="Primary"
+              className="hidden items-center gap-8 text-[0.75rem] font-medium uppercase tracking-[0.14em] text-ink/75 md:flex"
+            >
               <Link href="/#collection" className="transition-colors hover:text-clay-dark">
                 {t(locale, "collection")}
               </Link>
@@ -113,7 +128,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </Link>
             </nav>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 sm:gap-4">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 md:gap-4">
               <LocaleSwitcher current={locale} />
               <div className="hidden md:block">
                 <AccountMenu locale={locale} user={user} isAdmin={isAdmin} />
@@ -125,7 +140,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </header>
 
-        <main className="flex-1">{children}</main>
+        <main id="main" className="flex-1">
+          {children}
+        </main>
 
         <footer className="bg-ink text-ivory">
           <div className="shell grid gap-10 py-10 sm:gap-12 sm:py-14 md:grid-cols-[1.5fr_0.75fr_1fr] md:gap-16 md:py-16">
@@ -153,17 +170,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <p className="text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-ivory/70">
                 {t(locale, "collection")}
               </p>
-              <nav className="mt-5 flex flex-col gap-3 text-[0.95rem] text-ivory/80">
-                <Link href="/#collection" className="transition-colors hover:text-ivory">
+              <nav className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-[0.9rem] text-ivory/80 sm:flex sm:flex-col sm:gap-3 sm:text-[0.95rem]">
+                <Link href="/#collection" className="py-0.5 transition-colors hover:text-ivory">
                   {t(locale, "products")}
                 </Link>
-                <Link href="/#story" className="transition-colors hover:text-ivory">
+                <Link href="/#story" className="py-0.5 transition-colors hover:text-ivory">
                   {t(locale, "craft")}
                 </Link>
-                <Link href="/#reviews" className="transition-colors hover:text-ivory">
+                <Link href="/#reviews" className="py-0.5 transition-colors hover:text-ivory">
                   {t(locale, "reviews")}
                 </Link>
-                <Link href="/account" className="transition-colors hover:text-ivory">
+                <Link href="/account" className="py-0.5 transition-colors hover:text-ivory">
                   {t(locale, "account")}
                 </Link>
               </nav>
@@ -176,11 +193,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <p className="mt-5 max-w-xs text-[0.95rem] leading-7 text-ivory/70">
                 {t(locale, "handmadeNote")}
               </p>
-              <nav className="mt-5 flex flex-col gap-2 text-[0.9rem] text-ivory/75">
-                <Link href="/terms" className="transition-colors hover:text-ivory">Terms & Conditions</Link>
-                <Link href="/privacy" className="transition-colors hover:text-ivory">Privacy Policy</Link>
-                <Link href="/refund" className="transition-colors hover:text-ivory">Refund Policy</Link>
-                <Link href="/shipping" className="transition-colors hover:text-ivory">Shipping Policy</Link>
+              <nav className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2.5 text-[0.85rem] text-ivory/75 sm:flex sm:flex-col sm:gap-2 sm:text-[0.9rem]">
+                <Link href="/terms" className="py-0.5 transition-colors hover:text-ivory">Terms & Conditions</Link>
+                <Link href="/privacy" className="py-0.5 transition-colors hover:text-ivory">Privacy Policy</Link>
+                <Link href="/refund" className="py-0.5 transition-colors hover:text-ivory">Refund Policy</Link>
+                <Link href="/shipping" className="py-0.5 transition-colors hover:text-ivory">Shipping Policy</Link>
               </nav>
               <Link
                 href="/#collection"

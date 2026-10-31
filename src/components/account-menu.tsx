@@ -42,7 +42,7 @@ export default function AccountMenu({
   }, [open]);
 
   const menuLink =
-    "block px-3 py-2.5 text-[0.75rem] font-medium uppercase tracking-[0.12em] text-ink/80 transition-colors hover:bg-paper hover:text-clay-dark-dark";
+    "block px-3 py-2.5 text-[0.75rem] font-medium uppercase tracking-[0.12em] text-ink/80 transition-colors hover:bg-paper hover:text-clay-dark";
 
   return (
     <div ref={menuRef} className="relative">

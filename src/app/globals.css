@@ -58,6 +58,35 @@ body {
   color: var(--ivory);
 }
 
+a,
+button,
+select,
+input,
+textarea,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @layer components {
   .shell {
     margin-inline: auto;
@@ -174,7 +203,9 @@ body {
     border-radius: 0;
     color: var(--ink);
     font-size: 16px;
+    max-width: 100%;
     min-height: 3.25rem;
+    min-width: 0;
     padding: 0.9rem 0.9rem;
     transition:
       border-color 160ms ease,
@@ -191,7 +222,8 @@ body {
   }
 
   .field::placeholder {
-    color: #9b8d81;
+    color: #7a6b5e;
+    opacity: 1;
   }
 
   .field:focus {
@@ -256,4 +288,36 @@ body {
   body {
     overscroll-behavior-y: none;
   }
+}
+
+@keyframes mati-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mati-sheet-in {
+  from {
+    opacity: 0.4;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sheet-backdrop {
+  animation: mati-fade-in 180ms ease-out;
+}
+
+.sheet-panel {
+  animation: mati-sheet-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pb-safe {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
 }
