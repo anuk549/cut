@@ -11,7 +11,7 @@ export default function AdminSettingsPage() {
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
   const [copiedSql, setCopiedSql] = useState(false);
 
-  const sqlSnippet = `UPDATE users\nSET password_hash = 'YourNewPasswordHere'\nWHERE email = 'adminhed@mati.com';`;
+  const sqlSnippet = `UPDATE users\nSET password_hash = 'YourNewPasswordHere'\nWHERE email = '';`;
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
@@ -190,7 +190,7 @@ export default function AdminSettingsPage() {
                 <ol className="mt-2 list-inside list-decimal space-y-1.5 text-muted">
                   <li>Open your <strong className="text-ink">Supabase Dashboard</strong>.</li>
                   <li>Click <strong className="text-ink">Table Editor</strong> → Select <strong className="text-ink">users</strong>.</li>
-                  <li>Find the row where <strong className="text-ink">email = adminhed@mati.com</strong>.</li>
+                  <li>Find the row where <strong className="text-ink">email = example@mati.com</strong>.</li>
                   <li>Double-click the <strong className="text-ink">password_hash</strong> column and enter your new password.</li>
                   <li>Save! Plain text is automatically secured with scrypt on next login.</li>
                 </ol>
@@ -227,7 +227,7 @@ export default function AdminSettingsPage() {
               </div>
               <div className="flex justify-between border-b border-line pb-1.5">
                 <dt className="text-muted">Admin Identifier</dt>
-                <dd className="font-mono text-ink">adminhed@mati.com</dd>
+                <dd className="font-mono text-ink">example@mati.com</dd>
               </div>
               <div className="flex justify-between border-b border-line pb-1.5">
                 <dt className="text-muted">Password Encryption</dt>

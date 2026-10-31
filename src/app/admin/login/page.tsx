@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("adminhed@mati.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
@@ -28,17 +28,12 @@ export default function AdminLoginPage() {
         router.push("/admin");
         router.refresh();
       } else {
-        setError(data.error || "Invalid email or password. Only adminhed@mati.com has admin access.");
+        setError(data.error || "Invalid email or password. Please check your credentials and try again.");
       }
     } catch {
       setLoading(false);
       setError("Network error. Please try again.");
     }
-  }
-
-  function fillDefaultCredentials() {
-    setEmail("adminhed@mati.com");
-    setPassword("admin123");
   }
 
   return (
@@ -73,7 +68,7 @@ export default function AdminLoginPage() {
           </div>
           <div className="relative flex items-center gap-2 text-[0.75rem] font-medium uppercase tracking-[0.15em] text-ivory/70">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span>Database Synced · adminhed@mati.com only</span>
+            <span>Database Synced · Studio admin only</span>
           </div>
         </aside>
 
@@ -88,28 +83,8 @@ export default function AdminLoginPage() {
           <p className="eyebrow mt-10">Admin Access</p>
           <h1 className="display mt-3 text-4xl text-ink">Studio Login</h1>
           <p className="mt-2 text-[0.92rem] leading-relaxed text-muted">
-            Only <strong className="text-ink">adminhed@mati.com</strong> is authorized to access the studio.
+            Only authorized studio admins can access this area.
           </p>
-
-          {/* Quick Credential Hint Box */}
-          <div className="mt-6 rounded border border-line bg-ivory p-3.5 text-[0.8rem]">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold uppercase tracking-wider text-clay-dark text-[0.7rem]">
-                Admin Credentials (Supabase)
-              </span>
-              <button
-                type="button"
-                onClick={fillDefaultCredentials}
-                className="text-[0.7rem] uppercase tracking-wider text-ink underline hover:text-clay-dark"
-              >
-                Auto-fill
-              </button>
-            </div>
-            <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.78rem] text-ink">
-              <span>Email: <strong>adminhed@mati.com</strong></span>
-              <span>Password: <strong>admin123</strong></span>
-            </div>
-          </div>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
             <div>
@@ -122,7 +97,7 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="field"
-                placeholder="adminhed@mati.com"
+                placeholder="Your admin email"
                 required
                 autoComplete="username"
               />
@@ -193,7 +168,7 @@ export default function AdminLoginPage() {
           </form>
 
           <div className="mt-8 border-t border-line pt-4 text-[0.72rem] text-muted">
-            <span className="font-semibold text-ink">Database:</span> Only <strong className="text-ink">adminhed@mati.com</strong> in Supabase `users` can access this area.
+            <span className="font-semibold text-ink">Database:</span> Only authorized studio admins in the Supabase database can access this area.
           </div>
         </div>
       </div>

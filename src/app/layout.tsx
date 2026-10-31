@@ -79,7 +79,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     getCurrentUser().catch(() => null),
     isAdminAuthenticated().catch(() => false),
   ]);
-  // Only adminhed@mati.com can show admin dashboard access
   const isAdmin = user ? isAllowedAdminEmail(user.email) : rawIsAdmin;
   const year = new Date().getFullYear();
 
