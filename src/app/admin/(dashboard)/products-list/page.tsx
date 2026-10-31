@@ -6,7 +6,6 @@ import ProductActions from "../product-actions";
 import VisibilityToggle from "../visibility-toggle";
 import VesselArt from "@/components/vessel-art";
 import Image from "next/image";
-import Link from "next/link";
 import type { AdminProduct } from "../types";
 
 export const instant = false;
@@ -25,7 +24,7 @@ export default async function AdminProductsListPage() {
   const products = (data ?? []).map((p) => ({ ...(p as Omit<AdminProduct, "hidden">), hidden: hiddenIds.has(p.id) }));
   return (
     <div className="space-y-6">
-      <ProductForm locale={"en" as any} />
+      <ProductForm locale="en" />
       <section className="border border-line bg-ivory">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div>
@@ -52,10 +51,9 @@ export default async function AdminProductsListPage() {
                   <p className="mt-1 text-[0.9rem] text-muted">Stock: {product.stock} · {formatPrice(price)}{product.discount>0 && <span className="ml-2 text-muted line-through">{formatPrice(product.price)}</span>}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-3">
                     <VisibilityToggle productId={product.id} productName={product.name} hidden={product.hidden} />
-                    <Link href={`/admin/products/${product.id}`} className="text-[0.75rem] uppercase tracking-[0.11em] text-clay-dark">Edit</Link>
                   </div>
                 </div>
-                <ProductActions product={product} locale={"en" as any} />
+                <ProductActions product={product} locale="en" />
               </li>
             );
           })}

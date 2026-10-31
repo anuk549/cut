@@ -126,6 +126,11 @@ export default function AccountMenu({
                 <Link href="/signup" onClick={() => setOpen(false)} className={menuLink}>
                   {t(locale, "signup")}
                 </Link>
+                {isAdmin && (
+                  <Link href="/admin" onClick={() => setOpen(false)} className={menuLink}>
+                    {t(locale, "adminDashboard")}
+                  </Link>
+                )}
               </div>
             </>
           )}

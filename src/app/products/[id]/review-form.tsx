@@ -24,19 +24,24 @@ export default function ReviewForm({
     e.preventDefault();
     setLoading(true);
     setMsg("");
-    const res = await fetch("/reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId, rating, comment }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      setComment("");
-      setMsg("Feedback posted");
-      router.refresh();
-    } else {
-      const j = await res.json().catch(() => ({}));
-      setMsg(j.error ?? "Failed");
+    try {
+      const res = await fetch("/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, rating, comment }),
+      });
+      if (res.ok) {
+        setComment("");
+        setMsg("Feedback posted");
+        router.refresh();
+      } else {
+        const j = await res.json().catch(() => ({}));
+        setMsg(j.error ?? "Failed");
+      }
+    } catch {
+      setMsg("Could not post feedback. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -88,8 +93,8 @@ export default function ReviewForm({
         />
       </label>
 
-      <button type="submit" disabled={loading} className="btn btn-primary mt-5">
-        {loading ? "..." : t(locale, "submitReview")}
+      <button type="submit" disabled={loading} aria-busy={loading} className="btn btn-primary mt-5">
+        {loading ? "Posting…" : t(locale, "submitReview")}
       </button>
       {msg && (
         <p

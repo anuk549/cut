@@ -28,18 +28,23 @@ export default function SignupPage() {
       setMsg("Enter your username");
       return;
     }
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, fullName: fullName.trim() }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      router.push("/account");
-      router.refresh();
-    } else {
-      const j = await res.json().catch(() => ({}));
-      setMsg(j.error ?? "Failed");
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, fullName: fullName.trim() }),
+      });
+      if (res.ok) {
+        router.push("/account");
+        router.refresh();
+      } else {
+        const j = await res.json().catch(() => ({}));
+        setMsg(j.error ?? "Failed");
+      }
+    } catch {
+      setMsg("Could not create your account. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -99,8 +104,8 @@ export default function SignupPage() {
             <Link href="/privacy" className="text-clay-dark hover:text-ink">Privacy Policy</Link>.
           </p>
 
-          <button type="submit" disabled={loading} className="btn btn-primary mt-6 w-full">
-            {loading ? "..." : "Create account"}
+          <button type="submit" disabled={loading} aria-busy={loading} className="btn btn-primary mt-6 w-full">
+            {loading ? "Creating account…" : "Create account"}
           </button>
 
           <p className="mt-6 text-center text-[0.9rem] text-muted">

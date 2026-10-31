@@ -9,10 +9,23 @@ const priceFormatter = new Intl.NumberFormat("en-LK", { style: "currency", curre
 
 function formatPrice(v: number) { return priceFormatter.format(v).replace("LKR", "Rs."); }
 
+type AdminOrder = {
+  id: string;
+  quantity: number;
+  status: string | null;
+  created_at: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  shipping_note?: string | null;
+  customer_email?: string | null;
+  products: { name: string; price: number } | null;
+};
+
 export default async function AdminOrdersPage() {
   await connection();
   const supabase = createSupabaseAdminClient();
-  const { data: orders } = await supabase.from("orders").select("*, products(name, price)").order("created_at", { ascending: false }).limit(500);
+  const { data } = await supabase.from("orders").select("*, products(name, price)").order("created_at", { ascending: false }).limit(500);
+  const orders = (data ?? []) as AdminOrder[];
   return (
     <div className="border border-line bg-ivory">
       <div className="flex items-center justify-between border-b border-line px-5 py-4">
@@ -20,10 +33,10 @@ export default async function AdminOrdersPage() {
           <p className="eyebrow">Orders</p>
           <h2 className="font-display text-2xl text-ink">All Orders</h2>
         </div>
-        <p className="text-[0.75rem] uppercase tracking-[0.12em] text-muted">{(orders ?? []).length} orders</p>
+        <p className="text-[0.75rem] uppercase tracking-[0.12em] text-muted">{orders.length} orders</p>
       </div>
       <ul className="divide-y divide-line">
-        {(orders ?? []).map((order: any) => {
+        {orders.map((order) => {
           const total = order.products ? order.products.price * order.quantity : null;
           return (
             <li key={order.id} className="grid gap-4 p-4 sm:grid-cols-[1.2fr_0.9fr_auto] sm:items-start sm:gap-6 sm:p-5">
@@ -37,7 +50,7 @@ export default async function AdminOrdersPage() {
                 <p className="text-[0.75rem] uppercase tracking-[0.11em] text-muted">Customer</p>
                 <p className="mt-1 text-[0.95rem] text-ink">{order.customer_name || "Guest"}</p>
                 <p className="mt-0.5 text-[0.85rem] text-muted">{order.customer_phone || "-"}</p>
-                {(order as any).customer_email && <p className="mt-0.5 text-[0.85rem] text-muted">{(order as any).customer_email}</p>}
+                {order.customer_email && <p className="mt-0.5 text-[0.85rem] text-muted">{order.customer_email}</p>}
               </div>
               <div className="text-right">
                 <p className="text-[0.75rem] uppercase tracking-[0.1em] text-muted">{new Date(order.created_at).toLocaleDateString("en-LK", {day:"numeric",month:"short",year:"numeric"})}</p>
@@ -47,7 +60,7 @@ export default async function AdminOrdersPage() {
             </li>
           );
         })}
-        {(orders ?? []).length === 0 && <li className="p-5 text-[0.95rem] text-muted">No orders yet.</li>}
+        {orders.length === 0 && <li className="p-5 text-[0.95rem] text-muted">No orders yet.</li>}
       </ul>
     </div>
   );

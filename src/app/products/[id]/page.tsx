@@ -140,6 +140,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <p className="mt-8 border border-line bg-paper px-5 py-4 text-[0.95rem] text-clay-dark">
               This piece is hidden from the storefront. Unhide it to accept orders.
             </p>
+          ) : !user ? (
+            <div className="mt-8 border border-line bg-paper px-5 py-5">
+              <p className="text-[0.95rem] leading-6 text-muted">
+                Sign in to place an order and keep it with your account.
+              </p>
+              <Link href="/login" className="btn btn-primary mt-4 w-full">
+                {t(locale, "login")}
+              </Link>
+            </div>
           ) : p.stock > 0 ? (
             <OrderForm
               locale={locale}

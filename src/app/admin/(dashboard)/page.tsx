@@ -4,6 +4,16 @@ import Link from "next/link";
 
 export const instant = false;
 
+type RecentOrder = {
+  id: string;
+  quantity: number;
+  status: string | null;
+  customer_name: string | null;
+  customer_phone: string | null;
+  customer_email?: string | null;
+  products: { name: string } | null;
+};
+
 export default async function AdminDashboardHome() {
   await connection();
   const supabase = createSupabaseAdminClient();
@@ -40,7 +50,7 @@ export default async function AdminDashboardHome() {
           <Link href="/admin/orders" className="text-[0.75rem] uppercase tracking-[0.12em] text-clay-dark">View all</Link>
         </div>
         <ul className="divide-y divide-line">
-          {(ordersData ?? []).map((o: any) => (
+          {((ordersData ?? []) as RecentOrder[]).map((o) => (
             <li key={o.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div>
                 <p className="text-[0.95rem] font-medium text-ink">{o.products?.name ?? "Piece"} × {o.quantity}</p>
@@ -48,7 +58,7 @@ export default async function AdminDashboardHome() {
               </div>
               <div className="text-left sm:text-right">
                 <p className="text-[0.9rem] text-ink">{o.customer_name || "Guest"}</p>
-                <p className="text-[0.8rem] text-muted">{(o as any).customer_email || o.customer_phone || "-"}</p>
+                <p className="text-[0.8rem] text-muted">{o.customer_email || o.customer_phone || "-"}</p>
               </div>
             </li>
           ))}

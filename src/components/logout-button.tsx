@@ -30,7 +30,7 @@ export default function LogoutButton({
 
   return (
     <button type="button" onClick={logout} disabled={loading} className={className}>
-      {loading ? "..." : children}
+      {loading ? "Signing out…" : children}
     </button>
   );
 }

@@ -48,11 +48,10 @@ export default function OrderForm({
   userName?: string | null;
 }) {
   const [qty, setQty] = useState(1);
-  const [name, setName] = useState(userName ?? "");
+  const name = userName ?? "";
   const [phone, setPhone] = useState("");
   const [delivery, setDelivery] = useState(deliveryOptions[0]);
   const [area, setArea] = useState(areaOptions[0]);
-  const showDelivery = delivery === "Please deliver to me";
   const [orderId, setOrderId] = useState<string | null>(null);
   const [placedQty, setPlacedQty] = useState(1);
   const [msg, setMsg] = useState("");
@@ -66,18 +65,23 @@ export default function OrderForm({
     const locInput = document.getElementById("deliveryLocation") as HTMLInputElement | null;
     let deliveryNote = delivery === "Please deliver to me" ? `${delivery} | Area: ${area}` : delivery;
     if (delivery === "Please deliver to me" && locInput?.value) deliveryNote += ` | Location: ${locInput.value}`;
-    const res = await fetch("/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId, quantity: qty, customerName: name, customerPhone: phone, deliveryNote }),
-    });
-    const j = await res.json().catch(() => ({}));
-    setLoading(false);
-    if (res.ok) {
-      setOrderId(j.orderId);
-      setPlacedQty(j.quantity ?? qty);
-    } else {
-      setMsg(j.error ?? "Failed");
+    try {
+      const res = await fetch("/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, quantity: qty, customerName: name, customerPhone: phone, deliveryNote }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setOrderId(j.orderId);
+        setPlacedQty(j.quantity ?? qty);
+      } else {
+        setMsg(j.error ?? "Failed");
+      }
+    } catch {
+      setMsg("Could not place the order. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -179,7 +183,7 @@ export default function OrderForm({
             disabled={sharing}
             className="btn btn-outline w-full"
           >
-            {sharing ? "..." : t(locale, "sharePdf")}
+            {sharing ? "Preparing…" : t(locale, "sharePdf")}
           </button>
           <a
             href={`/orders/${orderId}/pdf`}
@@ -275,6 +279,10 @@ export default function OrderForm({
             className="field"
             placeholder="+94"
             type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            minLength={7}
+            required
           />
         </label>
 
@@ -285,8 +293,8 @@ export default function OrderForm({
           <span className="font-display text-2xl text-ink">{formatPrice(unitPrice * qty)}</span>
         </div>
 
-        <button type="submit" disabled={loading} className="btn btn-primary mt-4 w-full">
-          {loading ? "..." : t(locale, "orderNow")}
+        <button type="submit" disabled={loading} aria-busy={loading} className="btn btn-primary mt-4 w-full">
+          {loading ? "Placing order…" : t(locale, "orderNow")}
         </button>
         {msg && <p className="mt-3 text-[0.85rem] leading-5 text-clay-dark">{msg}</p>}
       </form>

@@ -30,18 +30,23 @@ export default function OrderStatus({
   async function save() {
     setLoading(true);
     setMsg("");
-    const res = await fetch(`/api/admin/orders/${orderId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, shipping_note: note || undefined }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      setMsg("Updated");
-      router.refresh();
-    } else {
-      const j = await res.json().catch(() => ({}));
-      setMsg(j.error ?? "Failed");
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, shipping_note: note || undefined }),
+      });
+      if (res.ok) {
+        setMsg("Updated");
+        router.refresh();
+      } else {
+        const j = await res.json().catch(() => ({}));
+        setMsg(j.error ?? "Failed");
+      }
+    } catch {
+      setMsg("Could not update order.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -62,9 +67,10 @@ export default function OrderStatus({
         <button
           onClick={save}
           disabled={loading}
+          aria-busy={loading}
           className="border border-ink px-2.5 py-1.5 text-[0.75rem] uppercase tracking-[0.11em] hover:bg-ink hover:text-ivory disabled:opacity-50"
         >
-          {loading ? "..." : "Update"}
+          {loading ? "Updating…" : "Update"}
         </button>
         {msg && <span className="text-[0.7rem] text-clay-dark">{msg}</span>}
       </div>

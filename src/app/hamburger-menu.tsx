@@ -101,6 +101,11 @@ export default function HamburgerMenu({
                   <Link href="/signup" onClick={close} className={panelLink}>
                     {t(locale, "signup")}
                   </Link>
+                  {isAdmin && (
+                    <Link href="/admin" onClick={close} className={panelLink}>
+                      {t(locale, "adminDashboard")}
+                    </Link>
+                  )}
                 </div>
               </>
             )}

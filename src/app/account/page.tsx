@@ -3,6 +3,7 @@ import { getLocale } from "@/lib/locale";
 import { t } from "@/i18n/messages";
 import { getCurrentUser } from "@/lib/user-auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getOwnedOrderIds } from "@/lib/order-ownership";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "@/components/logout-button";
@@ -22,11 +23,16 @@ export default async function AccountPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const locale = await getLocale();
+  const ownedOrderIds = await getOwnedOrderIds(user.id);
   const supabase = createSupabaseAdminClient();
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("*, products(name)")
-    .order("created_at", { ascending: false });
+  const { data: orders } =
+    ownedOrderIds.size > 0
+      ? await supabase
+          .from("orders")
+          .select("*, products(name)")
+          .in("id", Array.from(ownedOrderIds))
+          .order("created_at", { ascending: false })
+      : { data: [] as Order[] };
 
   return (
     <div className="shell py-14 lg:py-20">

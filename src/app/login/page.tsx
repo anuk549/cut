@@ -22,18 +22,23 @@ export default function LoginPage() {
       setMsg("Enter your username");
       return;
     }
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      router.push("/account");
-      router.refresh();
-    } else {
-      const j = await res.json().catch(() => ({}));
-      setMsg(j.error ?? "Failed");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (res.ok) {
+        router.push("/account");
+        router.refresh();
+      } else {
+        const j = await res.json().catch(() => ({}));
+        setMsg(j.error ?? "Failed");
+      }
+    } catch {
+      setMsg("Could not sign in. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -74,8 +79,8 @@ export default function LoginPage() {
 
           {msg && <p className="mt-4 text-[0.85rem] leading-5 text-clay-dark">{msg}</p>}
 
-          <button type="submit" disabled={loading} className="btn btn-primary mt-6 w-full">
-            {loading ? "..." : "Sign in"}
+          <button type="submit" disabled={loading} aria-busy={loading} className="btn btn-primary mt-6 w-full">
+            {loading ? "Signing in…" : "Sign in"}
           </button>
 
           <p className="mt-6 text-center text-[0.9rem] text-muted">
