@@ -34,7 +34,7 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, fullName: fullName.trim() }),
+        body: JSON.stringify({ email, password, fullName: fullName.trim(), hp_field: (document.getElementById("hp_field") as HTMLInputElement | null)?.value?.trim() ?? "" }),
       });
       if (res.ok) {
         router.push("/account");
@@ -105,6 +105,17 @@ export default function SignupPage() {
             and{" "}
             <Link href="/privacy" className="text-clay-dark hover:text-ink">Privacy Policy</Link>.
           </p>
+
+          <input
+            type="text"
+            name="hp_field"
+            id="hp_field"
+            value=""
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="hidden"
+          />
 
           <button type="submit" disabled={loading} aria-busy={loading} className="btn btn-primary mt-6 w-full">
             {loading ? "Creating account…" : "Create account"}

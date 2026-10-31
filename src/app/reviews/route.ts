@@ -4,7 +4,15 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getHiddenProductIds } from "@/lib/product-visibility";
 import { claimReview } from "@/lib/review-ownership";
 import { displayNameForEmail, getCurrentUser } from "@/lib/user-auth";
+import { sanitizeText } from "@/lib/security/sanitize";
+import { getClientKey, isBotSubmission, rateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
+
+const reviewSchema = z.object({
+  productId: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().max(2000).optional(),
+});
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -12,19 +20,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Sign in to leave feedback." }, { status: 401 });
   }
 
-  let body: { productId?: string; rating?: number; comment?: string };
+  const limited = rateLimit(`review:${user.id}:${getClientKey(req)}`, 5, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json({ error: "Too many reviews. Please wait a moment." }, { status: 429 });
+  }
+
+  let body: unknown;
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
 
-  const schema = z.object({
-    productId: z.string().uuid(),
-    rating: z.number().int().min(1).max(5),
-    comment: z.string().max(2000).optional(),
+  const input = (typeof body === "object" && body !== null ? body : {}) as Record<string, unknown>;
+
+  if (isBotSubmission(input)) {
+    return NextResponse.json({ error: "Invalid submission." }, { status: 400 });
+  }
+
+  const parsed = reviewSchema.safeParse({
+    productId: input.productId,
+    rating: input.rating,
+    comment: typeof input.comment === "string" ? sanitizeText(input.comment, 2000) : undefined,
   });
-  const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "invalid review" }, { status: 400 });
   }

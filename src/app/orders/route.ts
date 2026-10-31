@@ -5,7 +5,7 @@ import { getHiddenProductIds } from "@/lib/product-visibility";
 import { claimOrder, releaseOrder } from "@/lib/order-ownership";
 import { displayNameForEmail, getCurrentUser } from "@/lib/user-auth";
 import { sanitizePhone, sanitizeText } from "@/lib/security/sanitize";
-import { getClientKey, rateLimit } from "@/lib/security/rate-limit";
+import { getClientKey, isBotSubmission, rateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
 
 const orderSchema = z.object({
@@ -34,6 +34,11 @@ export async function POST(req: NextRequest) {
   }
 
   const input = (typeof body === "object" && body !== null ? body : {}) as Record<string, unknown>;
+
+  if (isBotSubmission(input)) {
+    return NextResponse.json({ error: "Invalid submission." }, { status: 400 });
+  }
+
   const parsed = orderSchema.safeParse({
     productId: input.productId,
     quantity: input.quantity,

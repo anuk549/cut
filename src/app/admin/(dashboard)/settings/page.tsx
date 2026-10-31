@@ -17,8 +17,8 @@ export default function AdminSettingsPage() {
     e.preventDefault();
     setMessage(null);
 
-    if (newPassword.length < 6) {
-      setMessage({ tone: "error", text: "New password must be at least 6 characters long." });
+    if (newPassword.length < 8) {
+      setMessage({ tone: "error", text: "New password must be at least 8 characters long." });
       return;
     }
 
@@ -127,10 +127,10 @@ export default function AdminSettingsPage() {
                 type={showPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Minimum 6 characters"
+                placeholder="Minimum 8 characters"
                 className="field"
                 required
-                minLength={6}
+                minLength={8}
                 autoComplete="new-password"
               />
             </div>
@@ -147,7 +147,7 @@ export default function AdminSettingsPage() {
                 placeholder="Repeat new password"
                 className="field"
                 required
-                minLength={6}
+                minLength={8}
                 autoComplete="new-password"
               />
             </div>

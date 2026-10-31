@@ -8,7 +8,7 @@ import {
   adminCookieOptions,
 } from "@/lib/admin-auth";
 import { sanitizeEmail } from "@/lib/security/sanitize";
-import { getClientKey, rateLimit } from "@/lib/security/rate-limit";
+import { getClientKey, rateLimit, resetRateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -62,6 +62,8 @@ export async function POST(req: NextRequest) {
       { status: 401 },
     );
   }
+
+  resetRateLimit(`login:${getClientKey(req)}`);
 
   const response = NextResponse.json({ ok: true, email: parsed.data.email });
   response.cookies.set(userCookieName(), createToken(res.userId), userCookieOptions());

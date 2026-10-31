@@ -25,10 +25,11 @@ export default function ReviewForm({
     setLoading(true);
     setMsg("");
     try {
+      const honeypot = (document.getElementById("website_url") as HTMLInputElement | null)?.value?.trim() ?? "";
       const res = await fetch("/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, rating, comment }),
+        body: JSON.stringify({ productId, rating, comment, website_url: honeypot }),
       });
       if (res.ok) {
         setComment("");
@@ -92,6 +93,17 @@ export default function ReviewForm({
           placeholder="Tell us how you live with this piece."
         />
       </label>
+
+      <input
+        type="text"
+        name="website_url"
+        id="website_url"
+        value=""
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
 
       <button type="submit" disabled={loading} aria-busy={loading} className="btn btn-primary mt-5">
         {loading ? "Posting…" : t(locale, "submitReview")}

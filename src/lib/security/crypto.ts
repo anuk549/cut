@@ -27,6 +27,18 @@ export function decrypt(payload: string): string {
   return decrypted.toString("utf8");
 }
 
+export function encryptJson(value: unknown): string {
+  return encrypt(JSON.stringify(value));
+}
+
+export function decryptJson<T = unknown>(payload: string): T | null {
+  try {
+    return JSON.parse(decrypt(payload)) as T;
+  } catch {
+    return null;
+  }
+}
+
 export function hashToken(token: string): string {
   return crypto.createHmac("sha256", getKey()).update(token).digest("hex");
 }

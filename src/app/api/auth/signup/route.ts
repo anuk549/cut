@@ -3,12 +3,12 @@ import type { NextRequest } from "next/server";
 import { signup, createToken, userCookieName, userCookieOptions } from "@/lib/user-auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { sanitizeEmail, sanitizeName } from "@/lib/security/sanitize";
-import { getClientKey, rateLimit } from "@/lib/security/rate-limit";
+import { getClientKey, isBotSubmission, rateLimit } from "@/lib/security/rate-limit";
 import { z } from "zod";
 
 const signupSchema = z.object({
   email: z.string().email().max(320),
-  password: z.string().min(6).max(200),
+  password: z.string().min(8).max(200),
   fullName: z.string().min(1).max(80),
 });
 
@@ -26,6 +26,11 @@ export async function POST(req: NextRequest) {
   }
 
   const input = (typeof body === "object" && body !== null ? body : {}) as Record<string, unknown>;
+
+  if (isBotSubmission(input)) {
+    return NextResponse.json({ error: "Invalid submission." }, { status: 400 });
+  }
+
   const parsed = signupSchema.safeParse({
     email: sanitizeEmail(input.email),
     password: typeof input.password === "string" ? input.password : "",

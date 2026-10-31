@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import PDFDocument from "pdfkit";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { getOwnedOrderIds } from "@/lib/order-ownership";
+import { getCurrentUser } from "@/lib/user-auth";
+import { getClientKey, rateLimit } from "@/lib/security/rate-limit";
+import { z } from "zod";
 
 type Order = {
   id: string;
@@ -21,8 +26,28 @@ function money(value: number) {
   }).format(value);
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!z.string().uuid().safeParse(id).success) {
+    return NextResponse.json({ error: "not found" }, { status: 404 });
+  }
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Sign in to download your order receipt." }, { status: 401 });
+  }
+
+  const isAdmin = await isAdminAuthenticated();
+  const ownedOrderIds = isAdmin ? new Set<string>([id]) : await getOwnedOrderIds(user.id);
+  if (!ownedOrderIds.has(id)) {
+    return NextResponse.json({ error: "not found" }, { status: 404 });
+  }
+
+  const limited = rateLimit(`pdf:${user.id}:${getClientKey(req)}`, 10, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json({ error: "Too many attempts. Please wait a moment." }, { status: 429 });
+  }
+
   const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from("orders")

@@ -32,6 +32,13 @@ export function rateLimit(key: string, limit = 10, windowMs = 60000) {
 }
 
 /**
+ * Clear a rate-limit bucket (e.g. after a successful login).
+ */
+export function resetRateLimit(key: string) {
+  buckets.delete(key);
+}
+
+/**
  * Extract true client IP in production across Vercel, Cloudflare, and reverse proxies.
  */
 export function getClientKey(req: Request) {
@@ -52,7 +59,8 @@ export function isBotSubmission(body: Record<string, unknown>): boolean {
   // Common honeypot field names
   const honeypotKeys = ["hp_field", "website_url", "company_fax", "bot_check"];
   for (const key of honeypotKeys) {
-    if (body[key] && typeof body[key] === "string" && body[key].trim().length > 0) {
+    const value = body[key];
+    if (typeof value === "string" && value.trim().length > 0) {
       return true;
     }
   }

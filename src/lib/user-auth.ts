@@ -1,12 +1,10 @@
 import { cookies } from "next/headers";
 import crypto from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { decryptJson, encryptJson } from "@/lib/security/crypto";
 
 const COOKIE = "user_session";
 
-function secret(): string {
-  return process.env.USER_SESSION_SECRET ?? process.env.ADMIN_SESSION_SECRET ?? "dev-secret";
-}
 
 export function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -81,24 +79,15 @@ export async function login(email: string, password: string): Promise<{ ok: bool
 
 export function createToken(userId: string): string {
   const expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
-  const payload = `${userId}.${expires}`;
-  const sig = crypto.createHmac("sha256", secret()).update(payload).digest("hex");
-  return `${payload}.${sig}`;
+  return encryptJson({ userId, expires });
 }
 
 export function verifyToken(token: string | undefined): string | null {
   if (!token) return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  const [userId, expiresStr, sig] = parts;
-  const expires = Number(expiresStr);
-  if (!Number.isFinite(expires) || Date.now() > expires) return null;
-  const expected = crypto.createHmac("sha256", secret()).update(`${userId}.${expires}`).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length) return null;
-  if (!crypto.timingSafeEqual(a, b)) return null;
-  return userId;
+  const data = decryptJson<{ userId: string; expires: number }>(token);
+  if (!data || typeof data.userId !== "string" || typeof data.expires !== "number") return null;
+  if (Date.now() > data.expires) return null;
+  return data.userId;
 }
 
 export function displayNameForEmail(email: string): string {
@@ -120,5 +109,5 @@ export async function getCurrentUser(): Promise<{ id: string; email: string } | 
 
 export function userCookieName() { return COOKIE; }
 export function userCookieOptions() {
-  return { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/", maxAge: 7 * 24 * 60 * 60 };
+  return { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict" as const, path: "/", maxAge: 7 * 24 * 60 * 60 };
 }

@@ -24,9 +24,16 @@ const MALICIOUS_BOT_AGENTS = [
   /zgrab/i,
   /nuclei/i,
   /havij/i,
+  /headless/i,
+  /phantomjs/i,
+  /selenium/i,
+  /playwright/i,
+  /puppeteer/i,
+  /python-requests/i,
+  /scrapy/i,
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const userAgent = request.headers.get("user-agent") || "";
 
@@ -52,19 +59,24 @@ export function middleware(request: NextRequest) {
 
   // D. CSRF Protection for state-changing API requests
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && pathname.startsWith("/api/")) {
+    const secFetchSite = request.headers.get("sec-fetch-site");
     const origin = request.headers.get("origin");
     const host = request.headers.get("host");
 
+    const sameSiteByFetch = !secFetchSite || secFetchSite === "same-origin";
+    let sameSiteByOrigin = true;
     if (origin && host) {
-      const originHost = origin.replace(/^https?:\/\//, "");
-      if (originHost !== host) {
-        return NextResponse.json({ error: "Forbidden: cross-origin mutation denied" }, { status: 403 });
-      }
+      const originHost = origin.replace(/^https?:\/\//, "").trim().toLowerCase();
+      const hostHost = host.trim().toLowerCase();
+      sameSiteByOrigin = originHost === hostHost;
+    }
+
+    if (!sameSiteByFetch || !sameSiteByOrigin) {
+      return NextResponse.json({ error: "Forbidden: cross-origin mutation denied" }, { status: 403 });
     }
   }
 
   // E. Route Protection for Studio Admin Area
-  // If accessing /admin/* (except /admin/login), require valid admin session cookie
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
     const adminSession = request.cookies.get("admin_session")?.value;
     if (!adminSession) {
@@ -85,7 +97,7 @@ export function middleware(request: NextRequest) {
 
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-XSS-Protection", "0"); // Deprecated in modern browsers, disabled to prevent XS-Search
+  response.headers.set("X-XSS-Protection", "0");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Permissions-Policy",
@@ -101,7 +113,6 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // Content Security Policy with @vercel/analytics and Supabase support
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",

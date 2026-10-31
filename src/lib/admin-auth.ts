@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import crypto from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { decryptJson, encryptJson } from "@/lib/security/crypto";
 
 const COOKIE = "admin_session";
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
@@ -10,12 +11,6 @@ export function isAllowedAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
   const clean = email.trim().toLowerCase();
   return clean === "adminhed@mati.com" || clean === "adminhead@mati.com";
-}
-
-function sessionSecret(): string {
-  const s = process.env.ADMIN_SESSION_SECRET;
-  if (!s) throw new Error("ADMIN_SESSION_SECRET is not set");
-  return s;
 }
 
 export function hashAdminPassword(password: string): string {
@@ -204,23 +199,15 @@ export async function verifyPassword(password: string, email?: string): Promise<
 
 export function createSessionToken(): string {
   const expires = Date.now() + SESSION_TTL_MS;
-  const payload = String(expires);
-  const sig = crypto.createHmac("sha256", sessionSecret()).update(payload).digest("hex");
-  return `${payload}.${sig}`;
+  return encryptJson({ exp: expires });
 }
 
 export function verifySessionToken(token: string | undefined): boolean {
   if (!token) return false;
-  const parts = token.split(".");
-  if (parts.length !== 2) return false;
-  const [payload, sig] = parts;
-  const expires = Number(payload);
-  if (!Number.isFinite(expires) || Date.now() > expires) return false;
-  const expected = crypto.createHmac("sha256", sessionSecret()).update(payload).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
+  const data = decryptJson<{ exp: number }>(token);
+  if (!data || typeof data.exp !== "number") return false;
+  if (Date.now() > data.exp) return false;
+  return true;
 }
 
 export async function isAdminAuthenticated(): Promise<boolean> {

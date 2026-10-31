@@ -66,10 +66,11 @@ export default function OrderForm({
     let deliveryNote = delivery === "Please deliver to me" ? `${delivery} | Area: ${area}` : delivery;
     if (delivery === "Please deliver to me" && locInput?.value) deliveryNote += ` | Location: ${locInput.value}`;
     try {
+      const honeypot = (document.getElementById("company_fax") as HTMLInputElement | null)?.value?.trim() ?? "";
       const res = await fetch("/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, quantity: qty, customerName: name, customerPhone: phone, deliveryNote }),
+        body: JSON.stringify({ productId, quantity: qty, customerName: name, customerPhone: phone, deliveryNote, company_fax: honeypot }),
       });
       const j = await res.json().catch(() => ({}));
       if (res.ok) {
@@ -292,6 +293,17 @@ export default function OrderForm({
           </span>
           <span className="font-display text-2xl text-ink">{formatPrice(unitPrice * qty)}</span>
         </div>
+
+        <input
+          type="text"
+          name="company_fax"
+          id="company_fax"
+          value=""
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="hidden"
+        />
 
         <button type="submit" disabled={loading} aria-busy={loading} className="btn btn-primary mt-4 w-full">
           {loading ? "Placing order…" : t(locale, "orderNow")}
