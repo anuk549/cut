@@ -9,7 +9,7 @@ import LocaleSwitcher from "./locale-switcher";
 import HamburgerMenu from "./hamburger-menu";
 import AccountMenu from "@/components/account-menu";
 import { getCurrentUser } from "@/lib/user-auth";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { isAdminAuthenticated, isAllowedAdminEmail } from "@/lib/admin-auth";
 import { connection } from "next/server";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -75,10 +75,12 @@ function BrandMark() {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   await connection();
   const locale = await getLocale();
-  const [user, isAdmin] = await Promise.all([
+  const [user, rawIsAdmin] = await Promise.all([
     getCurrentUser().catch(() => null),
     isAdminAuthenticated().catch(() => false),
   ]);
+  // Only adminhed@mati.com can show admin dashboard access
+  const isAdmin = user ? isAllowedAdminEmail(user.email) : rawIsAdmin;
   const year = new Date().getFullYear();
 
   return (
@@ -199,6 +201,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Link href="/privacy" className="py-0.5 transition-colors hover:text-ivory">Privacy Policy</Link>
                 <Link href="/refund" className="py-0.5 transition-colors hover:text-ivory">Refund Policy</Link>
                 <Link href="/shipping" className="py-0.5 transition-colors hover:text-ivory">Shipping Policy</Link>
+                <Link href="/admin/login" className="py-0.5 transition-colors hover:text-ivory text-ivory/50">Studio Access</Link>
               </nav>
               <Link
                 href="/#collection"

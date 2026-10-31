@@ -12,7 +12,9 @@ export default function SignupPage() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const email = emailLocal.trim() ? `${emailLocal.trim()}@mati.com` : "";
+  const email = emailLocal.trim().includes("@")
+    ? emailLocal.trim()
+    : `${emailLocal.trim()}@mati.com`;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

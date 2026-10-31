@@ -15,7 +15,12 @@ export function hashPassword(password: string): string {
 }
 
 function verifyHash(password: string, stored: string): boolean {
-  if (!stored || !stored.includes(":")) return false;
+  if (!stored) return false;
+
+  // Plaintext support: if stored directly in Supabase table as plain text
+  if (stored === password) return true;
+
+  if (!stored.includes(":")) return false;
   const [salt, hashHex] = stored.split(":");
   if (!salt || !hashHex) return false;
   let derived: Buffer;
@@ -31,18 +36,46 @@ function verifyHash(password: string, stored: string): boolean {
 
 export async function signup(email: string, password: string): Promise<{ ok: boolean; error?: string }> {
   const supabase = createSupabaseAdminClient();
-  const { data: existing } = await supabase.from("users").select("id").eq("email", email).maybeSingle();
+  const cleanEmail = email.trim().toLowerCase();
+  const { data: existing } = await supabase
+    .from("users")
+    .select("id")
+    .ilike("email", cleanEmail)
+    .maybeSingle();
+
   if (existing) return { ok: false, error: "email exists" };
-  const { error } = await supabase.from("users").insert({ email, password_hash: hashPassword(password) });
+  const { error } = await supabase
+    .from("users")
+    .insert({ email: cleanEmail, password_hash: hashPassword(password) });
+
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
 
 export async function login(email: string, password: string): Promise<{ ok: boolean; userId?: string; error?: string }> {
   const supabase = createSupabaseAdminClient();
-  const { data } = await supabase.from("users").select("id, password_hash").eq("email", email).maybeSingle();
+  const cleanEmail = email.trim().toLowerCase();
+  const { data } = await supabase
+    .from("users")
+    .select("id, email, password_hash")
+    .ilike("email", cleanEmail)
+    .maybeSingle();
+
   if (!data) return { ok: false, error: "invalid credentials" };
   if (!verifyHash(password, data.password_hash)) return { ok: false, error: "invalid credentials" };
+
+  // If password was stored as plaintext in DB, automatically upgrade to scrypt hash
+  if (data.password_hash === password) {
+    try {
+      await supabase
+        .from("users")
+        .update({ password_hash: hashPassword(password) })
+        .eq("id", data.id);
+    } catch {
+      // Background upgrade failure is non-fatal
+    }
+  }
+
   return { ok: true, userId: data.id };
 }
 

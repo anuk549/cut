@@ -2,6 +2,7 @@ import Link from "next/link";
 import LogoutButton from "@/components/logout-button";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
+import AdminNav from "./admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -9,32 +10,42 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");
+
   return (
     <div className="min-h-[calc(100dvh-5rem)] bg-paper">
       <div className="shell py-6 sm:py-8">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        {/* Top Header */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
           <div>
-            <p className="eyebrow">Studio</p>
-            <h1 className="display mt-2 text-3xl text-ink sm:text-4xl">Admin Dashboard</h1>
+            <div className="flex items-center gap-2">
+              <span className="eyebrow">Studio Studio</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Live Database
+              </span>
+            </div>
+            <h1 className="display mt-1 text-3xl text-ink sm:text-4xl">Admin Workspace</h1>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/" className="btn btn-outline">Storefront</Link>
-            <LogoutButton endpoint="/api/admin/logout" redirectTo="/admin/login" className="btn btn-primary">Logout</LogoutButton>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/"
+              className="btn btn-outline inline-flex items-center gap-1.5 text-[0.75rem]"
+            >
+              <span>← View Storefront</span>
+            </Link>
+            <LogoutButton
+              endpoint="/api/admin/logout"
+              redirectTo="/admin/login"
+              className="btn btn-primary text-[0.75rem]"
+            >
+              Sign out
+            </LogoutButton>
           </div>
         </div>
-        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-          <aside className="border border-line bg-ivory p-3 sm:p-4">
-            <nav className="flex flex-col gap-1">
-              <Link href="/admin" className="px-3 py-2 text-[0.9rem] hover:bg-paper">Dashboard</Link>
-              <Link href="/admin/products-list" className="px-3 py-2 text-[0.9rem] hover:bg-paper">Add / Manage Products</Link>
-              <Link href="/admin/orders" className="px-3 py-2 text-[0.9rem] hover:bg-paper">All Orders</Link>
-              <Link href="/admin/users" className="px-3 py-2 text-[0.9rem] hover:bg-paper">Users</Link>
-            </nav>
-            <div className="mt-4 border-t border-line pt-4">
-              <p className="px-3 text-[0.7rem] uppercase tracking-[0.14em] text-muted">Quick</p>
-              <Link href="/admin/products-list" className="mt-2 inline-flex px-3 py-2 text-[0.9rem] text-clay-dark hover:text-ink">+ Add Item</Link>
-            </div>
-          </aside>
+
+        {/* Navigation & Main Content */}
+        <div className="grid gap-6 lg:grid-cols-[250px_1fr]">
+          <AdminNav />
           <main className="min-w-0">{children}</main>
         </div>
       </div>
